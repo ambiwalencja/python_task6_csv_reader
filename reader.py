@@ -1,4 +1,6 @@
+import os
 import sys
+# from os import path
 
 
 class CsvReader:
@@ -23,7 +25,12 @@ class CsvReader:
 
     def modify_file(self):
         for change in self.list_of_changes:  # pętla po wszystkich zmianach (każda zmiana to lista)
+            if int(change[0]) > len(self.list_of_lines) - 1:  # jeśli podamy zbyt duzy Y
+                return False
+            if int(change[1]) > len(self.list_of_lines[0]) - 1:  # jeśli podamy zbyt duży X
+                return False
             self.list_of_lines[int(change[0])][int(change[1])] = change[2]  # podmieniamy element listy
+        return True
 
     def save_file(self):
         with open(self.output_file, "w") as file:
@@ -33,8 +40,26 @@ class CsvReader:
                 file.write(str(line[-1] + "\n"))  # a po ostatnim enter
 
 
-my_reader = CsvReader()
-# print(my_reader.list_of_lines)
-my_reader.modify_file()
-# print(my_reader.list_of_lines)
-my_reader.save_file()
+def check_input_file():
+    if not os.path.exists(sys.argv[1]):
+        return False
+    return True
+
+
+def show_directory():
+    files = []
+    for element in os.listdir('.'):
+        if os.path.isfile(element):
+            files.append(element)
+    return files
+
+
+# ------------------------------------------------------------------------
+if not check_input_file():
+    print(f'No such file. Available files: {show_directory()}')
+else:
+    my_reader = CsvReader()
+    if not my_reader.modify_file():
+        print(f'Change impossible - maximum index of row is {len(my_reader.list_of_lines) - 1} '
+              f'and maximum index of column is {len(my_reader.list_of_lines[0]) - 1}')
+    my_reader.save_file()
